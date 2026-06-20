@@ -74,9 +74,22 @@ Focus on localized solutions for Indian households: solar panels (PM Surya Ghar)
         { role: 'user', parts: [{ text: message }] }
       ];
 
-      const result = await model.generateContent({
-        contents,
-      });
+      let result;
+      try {
+        result = await model.generateContent({
+          contents,
+        });
+      } catch (err: any) {
+        Logger.warn('Gemini 2.5 flash content generation failed. Falling back to gemini-1.5-flash.', err);
+        const fallbackModel = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          systemInstruction: `You are the Carbon Footprint Coach of India. Help users understand, track, and reduce their carbon footprint.
+Focus on localized solutions for Indian households: solar panels (PM Surya Ghar), composting food waste, setting up bio-gas plants, organic waste recycling, public transport (metro, buses), adopting EVs instead of petrol/diesel, growing native trees, and disaster preparedness. Keep responses encouraging, concise, structured, and in markdown format.`,
+        });
+        result = await fallbackModel.generateContent({
+          contents,
+        });
+      }
       const replyText = result.response.text();
       return NextResponse.json({ reply: replyText });
     }
@@ -107,7 +120,19 @@ You MUST respond with a JSON object containing exactly these fields:
   "donts": ["3-5 actions to stop doing or avoid"]
 }`;
 
-      const result = await model.generateContent(prompt);
+      let result;
+      try {
+        result = await model.generateContent(prompt);
+      } catch (err: any) {
+        Logger.warn('Gemini 2.5 flash audit generation failed. Falling back to gemini-1.5-flash.', err);
+        const fallbackModel = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            responseMimeType: 'application/json',
+          },
+        });
+        result = await fallbackModel.generateContent(prompt);
+      }
       const rawText = result.response.text();
       
       try {
