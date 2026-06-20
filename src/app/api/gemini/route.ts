@@ -45,21 +45,38 @@ export async function POST(request: Request) {
 Focus on localized solutions for Indian households: solar panels (PM Surya Ghar), composting food waste, setting up bio-gas plants, organic waste recycling, public transport (metro, buses), adopting EVs instead of petrol/diesel, growing native trees, and disaster preparedness. Keep responses encouraging, concise, structured, and in markdown format.`,
       });
 
-      // Filter history to ensure it strictly starts with a 'user' message as required by Gemini API
-      const firstUserIndex = history.findIndex((item: ChatHistoryItem) => item.role === 'user');
-      const validHistory = firstUserIndex > -1 ? history.slice(firstUserIndex) : [];
+      // Filter history to ensure it strictly starts with 'user' and alternates between 'user' and 'model'
+      const cleanHistory: ChatHistoryItem[] = [];
+      let expectedRole: 'user' | 'model' = 'user';
+
+      for (const item of history) {
+        if (item.role === expectedRole) {
+          cleanHistory.push(item);
+          expectedRole = expectedRole === 'user' ? 'model' : 'user';
+        }
+      }
+
+      // If the clean history ends with 'user', we remove the last item to ensure that
+      // appending the new user message doesn't create two consecutive 'user' messages.
+      if (cleanHistory.length > 0 && cleanHistory[cleanHistory.length - 1].role === 'user') {
+        cleanHistory.pop();
+      }
 
       // Format history to match SDK expectations
-      const formattedHistory = validHistory.map((item: ChatHistoryItem) => ({
+      const formattedHistory = cleanHistory.map((item: ChatHistoryItem) => ({
         role: item.role === 'user' ? 'user' : 'model',
         parts: [{ text: item.content }],
       }));
 
-      const chat = model.startChat({
-        history: formattedHistory,
-      });
+      // Use generateContent stateless API instead of startChat session
+      const contents = [
+        ...formattedHistory,
+        { role: 'user', parts: [{ text: message }] }
+      ];
 
-      const result = await chat.sendMessage(message);
+      const result = await model.generateContent({
+        contents,
+      });
       const replyText = result.response.text();
       return NextResponse.json({ reply: replyText });
     }
