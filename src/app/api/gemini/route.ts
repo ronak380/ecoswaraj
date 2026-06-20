@@ -120,9 +120,12 @@ You MUST respond with a JSON object containing exactly these fields:
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: any) {
     Logger.error('Error in Gemini API route', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Internal Server Error',
+      details: error?.message || String(error)
+    }, { status: 500 });
   }
 }
 

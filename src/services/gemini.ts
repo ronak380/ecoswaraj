@@ -32,14 +32,19 @@ export class GeminiService {
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini service error: ${response.statusText}`);
+        let errDetails = response.statusText;
+        try {
+          const errData = await response.json();
+          errDetails = errData.details || errData.error || errDetails;
+        } catch (_) {}
+        throw new Error(errDetails);
       }
 
       const data = await response.json();
       return data.reply;
-    } catch (error) {
+    } catch (error: any) {
       Logger.error('Gemini chat service failure', error);
-      return "Namaste! I'm having trouble connecting to my servers right now. Let's talk about carbon footprint reduction (like using solar rooftops or setting up bio-gas plants in India) in just a moment!";
+      return `Namaste! I'm having trouble connecting to my servers right now. (Error: ${error?.message || error}). Let's talk about carbon footprint reduction (like using solar rooftops or setting up bio-gas plants in India) in just a moment!`;
     }
   }
 
@@ -65,11 +70,16 @@ export class GeminiService {
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini audit error: ${response.statusText}`);
+        let errDetails = response.statusText;
+        try {
+          const errData = await response.json();
+          errDetails = errData.details || errData.error || errDetails;
+        } catch (_) {}
+        throw new Error(errDetails);
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       Logger.error('Gemini audit service failure', error);
       // Clean fallback audits tailored to Indian Context if server is offline
       return {
