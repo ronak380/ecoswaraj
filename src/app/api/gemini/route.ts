@@ -45,8 +45,12 @@ export async function POST(request: Request) {
 Focus on localized solutions for Indian households: solar panels (PM Surya Ghar), composting food waste, setting up bio-gas plants, organic waste recycling, public transport (metro, buses), adopting EVs instead of petrol/diesel, growing native trees, and disaster preparedness. Keep responses encouraging, concise, structured, and in markdown format.`,
       });
 
+      // Filter history to ensure it strictly starts with a 'user' message as required by Gemini API
+      const firstUserIndex = history.findIndex((item: ChatHistoryItem) => item.role === 'user');
+      const validHistory = firstUserIndex > -1 ? history.slice(firstUserIndex) : [];
+
       // Format history to match SDK expectations
-      const formattedHistory = history.map((item: ChatHistoryItem) => ({
+      const formattedHistory = validHistory.map((item: ChatHistoryItem) => ({
         role: item.role === 'user' ? 'user' : 'model',
         parts: [{ text: item.content }],
       }));
