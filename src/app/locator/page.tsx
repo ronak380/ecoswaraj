@@ -56,7 +56,12 @@ export default function GreenLocator() {
 
   // Initialize Map
   useEffect(() => {
-    const mapsApiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY;
+    let mapsApiKey = '';
+    if (typeof window !== 'undefined' && (window as any).__ENV__) {
+      mapsApiKey = (window as any).__ENV__.MAPS_API_KEY || '';
+    } else {
+      mapsApiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY || '';
+    }
 
     if (!mapsApiKey) {
       Logger.warn('Google Maps API key is missing. Renders fallback graphic simulation maps dashboard.');

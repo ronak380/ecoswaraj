@@ -216,6 +216,11 @@ a:hover {
   transition: var(--transition-fast);
 }
 
+select.form-control option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
 .form-control:focus {
   outline: none;
   border-color: var(--secondary);

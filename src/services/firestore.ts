@@ -118,7 +118,12 @@ export class FirestoreService {
    * Helper checking if active Firebase config uses mock keys.
    */
   private static isMockConfig(): boolean {
-    const key = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    let key = '';
+    if (typeof window !== 'undefined' && (window as any).__ENV__) {
+      key = (window as any).__ENV__.FIREBASE_API_KEY || '';
+    } else {
+      key = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || '';
+    }
     return !key || key.includes('mock-api-key') || key === '';
   }
 

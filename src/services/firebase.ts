@@ -8,15 +8,22 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { Logger } from './logger';
 
+const getEnv = (key: string, fallback: string): string => {
+  if (typeof window !== 'undefined' && (window as any).__ENV__) {
+    return (window as any).__ENV__[key] || fallback;
+  }
+  return process.env[key] || process.env[`NEXT_PUBLIC_${key}`] || fallback;
+};
+
 // Default mock configuration for local/grading environments if real environment keys are absent.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'mock-api-key-12345-carbon-footprint',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'carbon-footprint-mock.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'carbon-footprint-mock',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'carbon-footprint-mock.appspot.com',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789012',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456789012:web:abcdef123456',
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-MOCK123456'
+  apiKey: getEnv('FIREBASE_API_KEY', 'mock-api-key-12345-carbon-footprint'),
+  authDomain: getEnv('FIREBASE_AUTH_DOMAIN', 'carbon-footprint-mock.firebaseapp.com'),
+  projectId: getEnv('FIREBASE_PROJECT_ID', 'carbon-footprint-mock'),
+  storageBucket: getEnv('FIREBASE_STORAGE_BUCKET', 'carbon-footprint-mock.appspot.com'),
+  messagingSenderId: getEnv('FIREBASE_MESSAGING_SENDER_ID', '123456789012'),
+  appId: getEnv('FIREBASE_APP_ID', '1:123456789012:web:abcdef123456'),
+  measurementId: getEnv('FIREBASE_MEASUREMENT_ID', 'G-MOCK123456')
 };
 
 let app: FirebaseApp;
