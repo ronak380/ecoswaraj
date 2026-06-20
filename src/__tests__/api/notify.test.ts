@@ -12,6 +12,13 @@ jest.mock('next/server', () => ({
   },
 }));
 
+const mockSend = jest.fn();
+jest.mock('firebase-admin/messaging', () => ({
+  getMessaging: jest.fn(() => ({
+    send: mockSend,
+  })),
+}));
+
 import { POST } from '@/app/api/notify/route';
 import { getFirebaseAdmin } from '@/services/firebaseAdmin';
 
@@ -37,11 +44,9 @@ describe('Notify API Route Handler', () => {
   });
 
   it('should send notification successfully when Firebase Admin is initialized', async () => {
-    const mockSend = jest.fn().mockResolvedValue('fcm-msg-id-999');
+    mockSend.mockResolvedValueOnce('fcm-msg-id-999');
     (getFirebaseAdmin as jest.Mock).mockReturnValue({
-      messaging: () => ({
-        send: mockSend,
-      }),
+      name: '[DEFAULT]',
     });
 
     const mockRequest = {
@@ -86,11 +91,9 @@ describe('Notify API Route Handler', () => {
   });
 
   it('should return mock messageId if sending throws an error', async () => {
-    const mockSend = jest.fn().mockRejectedValue(new Error('FCM connection error'));
+    mockSend.mockRejectedValueOnce(new Error('FCM connection error'));
     (getFirebaseAdmin as jest.Mock).mockReturnValue({
-      messaging: () => ({
-        send: mockSend,
-      }),
+      name: '[DEFAULT]',
     });
 
     const mockRequest = {

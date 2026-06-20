@@ -7,23 +7,17 @@ const mockInitializeApp = jest.fn((config) => {
   const app = {
     name: '[DEFAULT]',
     config,
-    messaging: () => ({
-      send: jest.fn(() => Promise.resolve('msg-12345'))
-    })
   };
   mockApps.push(app);
   return app;
 });
 const mockCert = jest.fn((certConfig) => certConfig);
 
-jest.mock('firebase-admin', () => ({
-  get apps() {
-    return mockApps;
-  },
+jest.mock('firebase-admin/app', () => ({
+  getApps: () => mockApps,
+  getApp: () => mockApps[0],
   initializeApp: (config: any) => mockInitializeApp(config),
-  credential: {
-    cert: (certConfig: any) => mockCert(certConfig),
-  }
+  cert: (certConfig: any) => mockCert(certConfig),
 }));
 
 import { getFirebaseAdmin } from '@/services/firebaseAdmin';
@@ -68,7 +62,6 @@ describe('Firebase Admin Initialization Service', () => {
 
   it('should return existing app if already initialized', () => {
     const app1 = getFirebaseAdmin();
-    // Simulate that app1 is added to mockApps so it bypasses initialization on the second call
     const app2 = getFirebaseAdmin();
     expect(app1).toBe(app2);
     expect(mockInitializeApp).toHaveBeenCalledTimes(1);

@@ -3,16 +3,16 @@
  * Handles loading of service account credentials with graceful mock backups for local tests.
  */
 
-import * as admin from 'firebase-admin';
+import { getApps, initializeApp, getApp, cert, App } from 'firebase-admin/app';
 import { Logger } from './logger';
 
 /**
  * Initializes and retrieves the Firebase Admin application instance.
  * Falls back to mock project settings if credentials are not configured in environment variables.
  */
-export function getFirebaseAdmin() {
-  if (admin.apps.length > 0) {
-    return admin.apps[0];
+export function getFirebaseAdmin(): App | null {
+  if (getApps().length > 0) {
+    return getApp();
   }
 
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'carbon-footprint-mock';
@@ -22,8 +22,8 @@ export function getFirebaseAdmin() {
   if (projectId && clientEmail && privateKey) {
     try {
       Logger.info('Initializing Firebase Admin SDK using service account credentials.');
-      return admin.initializeApp({
-        credential: admin.credential.cert({
+      return initializeApp({
+        credential: cert({
           projectId,
           clientEmail,
           privateKey: privateKey.replace(/\\n/g, '\n'),
@@ -36,7 +36,7 @@ export function getFirebaseAdmin() {
 
   try {
     Logger.info(`Initializing Firebase Admin SDK in offline/mock mode for project: ${projectId}`);
-    return admin.initializeApp({
+    return initializeApp({
       projectId,
     });
   } catch (error) {

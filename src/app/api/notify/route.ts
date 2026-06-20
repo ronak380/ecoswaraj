@@ -4,6 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { getMessaging } from 'firebase-admin/messaging';
 import { getFirebaseAdmin } from '@/services/firebaseAdmin';
 import { Logger } from '@/services/logger';
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      const messaging = adminApp.messaging();
+      const messaging = getMessaging(adminApp);
       const message = {
         notification: {
           title,
