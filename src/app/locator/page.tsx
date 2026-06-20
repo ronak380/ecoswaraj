@@ -25,11 +25,21 @@ export default function GreenLocator() {
   const [geofenceAlert, setGeofenceAlert] = useState<string | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [hasMapsKey, setHasMapsKey] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
+
+    let key = '';
+    if (typeof window !== 'undefined' && (window as any).__ENV__) {
+      key = (window as any).__ENV__.MAPS_API_KEY || '';
+    } else {
+      key = process.env.NEXT_PUBLIC_MAPS_API_KEY || '';
+    }
+    setHasMapsKey(!!key);
+
     return () => unsubscribe();
   }, []);
 
@@ -212,7 +222,7 @@ export default function GreenLocator() {
         {/* Left Side: Map / Fallback Dashboard */}
         <section aria-label="Eco Map Dashboard">
           <div className="card" style={{ padding: '12px', height: '500px', display: 'flex', flexDirection: 'column' }}>
-            {process.env.NEXT_PUBLIC_MAPS_API_KEY ? (
+            {hasMapsKey ? (
               <div ref={mapRef} style={{ width: '100%', height: '100%', borderRadius: '12px' }} aria-label="Interactive Google Map showing green landmarks" />
             ) : (
               // Fallback Graphical Coordinates Dashboard

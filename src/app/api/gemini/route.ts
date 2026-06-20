@@ -13,16 +13,14 @@ interface ChatHistoryItem {
   content: string;
 }
 
-// Initializing the SDK with the environment variable
-const apiKey = process.env.GEMINI_API_KEY || '';
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-
 // Use gemini-2.5-flash for standard conversational and reasoning tasks as requested.
 // Fallback to gemini-1.5-flash if needed, but default is gemini-2.5-flash.
 const MODEL_NAME = 'gemini-2.5-flash';
 
 export async function POST(request: Request) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
     const body = await request.json();
     const { action } = body;
 
