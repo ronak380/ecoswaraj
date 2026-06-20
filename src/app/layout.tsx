@@ -3,6 +3,8 @@ import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import './globals.css';
 
+export const dynamic = 'force-dynamic';
+
 // SEO Meta configuration
 export const metadata: Metadata = {
   title: 'EcoSwaraj - Personal Carbon Footprint Tracker & Insights',
