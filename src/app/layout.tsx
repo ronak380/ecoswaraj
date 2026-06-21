@@ -47,6 +47,28 @@ export default function RootLayout({
           }}
         />
 
+        {/* Structured Metadata JSON-LD for AI crawlers & SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "EcoSwaraj",
+              "url": "https://ecoswaraj-280584091428.asia-south1.run.app/",
+              "description": "Personal Carbon Footprint Tracker and AI Insights for India.",
+              "applicationCategory": "SustainabilityApplication",
+              "operatingSystem": "All",
+              "browserRequirements": "Requires JavaScript",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "INR"
+              }
+            }),
+          }}
+        />
+
         {/* Google Analytics (GA4) */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
