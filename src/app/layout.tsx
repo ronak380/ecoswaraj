@@ -97,6 +97,11 @@ export default function RootLayout({
         </Script>
       </head>
       <body>
+        {/* Skip to Content fast-travel link for screen readers */}
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
+
         {/* GTM Noscript Fallback */}
         <noscript>
           <iframe

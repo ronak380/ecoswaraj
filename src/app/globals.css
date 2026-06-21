@@ -320,3 +320,23 @@ select.form-control option {
 .nav-link:hover::after, .nav-link.active::after {
   width: 100%;
 }
+
+/* Accessibility Skip Link */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--primary);
+  color: black;
+  padding: 8px 16px;
+  z-index: 99999;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: bold;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: 16px;
+  outline: 2px solid var(--secondary);
+}
