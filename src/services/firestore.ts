@@ -58,6 +58,17 @@ export const EMISSION_FACTORS = {
 };
 
 /**
+ * Wraps a promise in a timeout check.
+ * Rejects the promise if it takes longer than the specified milliseconds.
+ */
+function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Operation timed out')), ms))
+  ]);
+}
+
+/**
  * Calculates carbon footprint in kg CO2 based on Indian household/transport variables.
  */
 export function calculateFootprint(log: Omit<CarbonFootprintLog, 'totalFootprintKg' | 'pointsEarned'>): {
@@ -155,7 +166,7 @@ export class FirestoreService {
 
     try {
       const docRef = doc(db, 'users', userId, 'logs', entry.date);
-      await setDoc(docRef, completeEntry);
+      await withTimeout(setDoc(docRef, completeEntry));
       Logger.info(`Log saved to Firestore for user: ${userId} on date: ${entry.date}`);
     } catch (error) {
       Logger.warn('Firestore write failed, falling back to localStorage.', error);
@@ -186,7 +197,7 @@ export class FirestoreService {
     try {
       const logsRef = collection(db, 'users', userId, 'logs');
       const q = query(logsRef, orderBy('date', 'desc'), limit(30));
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await withTimeout(getDocs(q));
       const logs: CarbonFootprintLog[] = [];
       querySnapshot.forEach((docSnap) => {
         logs.push(docSnap.data() as CarbonFootprintLog);
@@ -207,11 +218,11 @@ export class FirestoreService {
     if (!this.isMockConfig()) {
       try {
         const entryRef = doc(db, 'leaderboard', userId);
-        await setDoc(entryRef, {
+        await withTimeout(setDoc(entryRef, {
           userId,
           userName,
           totalPoints: pointsEarned // In a real app we increment, for simplicity we store the latest
-        }, { merge: true });
+        }, { merge: true }));
       } catch (error) {
         Logger.warn('Firestore leaderboard write failed, updating local leaderboard.', error);
       }
@@ -236,7 +247,7 @@ export class FirestoreService {
       try {
         const boardRef = collection(db, 'leaderboard');
         const q = query(boardRef, orderBy('totalPoints', 'desc'), limit(10));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await withTimeout(getDocs(q));
         const board: LeaderboardEntry[] = [];
         querySnapshot.forEach((docSnap) => {
           board.push(docSnap.data() as LeaderboardEntry);
